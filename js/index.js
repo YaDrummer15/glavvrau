@@ -1,11 +1,5 @@
 /* ============================================================
    🖼️ УПРАВЛЕНИЕ ФОТОГРАФИЯМИ САЙТА (меняем прямо здесь!)
-   ============================================================
-   Примеры:
-     avatar: 'images/avatar.jpg'
-     hero: 'images/hero.jpg'
-     bio: 'images/bio.jpg'
-   Пустая строка ('') — показывается SVG-иконка.
    ============================================================ */
 const SITE_PHOTOS = {
   avatar: '',
@@ -64,6 +58,53 @@ const SITE_PHOTOS = {
   }
 
   // ============================================================
+  // МОБИЛЬНОЕ МЕНЮ (бургер)
+  // ============================================================
+  const burger = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('mobileBackdrop');
+
+  function openMobileMenu(){
+    if(!burger || !mobileMenu || !backdrop) return;
+    burger.classList.add('open');
+    burger.setAttribute('aria-expanded', 'true');
+    mobileMenu.classList.add('open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileMenu(){
+    if(!burger || !mobileMenu || !backdrop) return;
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+    mobileMenu.classList.remove('open');
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function toggleMobileMenu(){
+    if(!burger) return;
+    if(burger.classList.contains('open')) closeMobileMenu();
+    else openMobileMenu();
+  }
+
+  if(burger){
+    burger.addEventListener('click', toggleMobileMenu);
+  }
+  if(backdrop){
+    backdrop.addEventListener('click', closeMobileMenu);
+  }
+  if(mobileMenu){
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        // Небольшая задержка, чтобы плавная прокрутка успела стартовать
+        setTimeout(closeMobileMenu, 200);
+      });
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeMobileMenu();
+  });
+
+  // ============================================================
   // НАВИГАЦИЯ: скролл-эффект
   // ============================================================
   const nav = document.getElementById('topNav');
@@ -79,7 +120,7 @@ const SITE_PHOTOS = {
   }, { passive: true });
 
   // ============================================================
-  // ПАРАЛЛАКС декоративных элементов
+  // ПАРАЛЛАКС
   // ============================================================
   const parallaxEls = document.querySelectorAll('[data-parallax]');
   let parallaxTicking = false;
@@ -232,7 +273,7 @@ const SITE_PHOTOS = {
   }
 
   // ============================================================
-  // АНИМАЦИЯ ПОЯВЛЕНИЯ ПРИ СКРОЛЛЕ
+  // АНИМАЦИЯ ПОЯВЛЕНИЯ
   // ============================================================
   const fadeEls = document.querySelectorAll('.fade-up');
   if('IntersectionObserver' in window){
