@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Вход в кабинет главного врача">
+<title>Вход в кабинет · Шумиловская В.С.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"></noscript>
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-logo">
+    <div class="login-mark">🌿</div>
+    <h1>Кабинет врача</h1>
+    <p>Шумиловская В.С.</p>
+  </div>
+
+  <form class="login-form" id="loginForm" autocomplete="off">
+    <div class="login-error" id="loginError">
+      <span>⚠️</span>
+      <span id="loginErrorText">Неверный логин или пароль</span>
+    </div>
+    <div class="form-group">
+      <label for="username">👤 Логин</label>
+      <input type="text" id="username" placeholder="Введите логин" required autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label for="password">🔒 Пароль</label>
+      <div class="pass-wrap">
+        <input type="password" id="password" placeholder="Введите пароль" required autocomplete="new-password">
+        <button type="button" class="pass-toggle" id="passToggle" aria-label="Показать пароль">👁</button>
+      </div>
+    </div>
+    <button type="submit" class="login-btn">→ Войти в кабинет</button>
+  </form>
+
+  <div class="login-hint">
+    <div class="hint-line">🔑 <span>Демо-доступ</span></div>
+    Логин: <strong>doctor</strong> · Пароль: <strong>1234</strong>
+  </div>
+
+  <a href="index.html" class="back-home">← Вернуться на сайт</a>
+</div>
+
+<script src="js/login.js" defer></script>
+</body>
+</html>

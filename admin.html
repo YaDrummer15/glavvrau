@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Кабинет главного врача · Шумиловская В.С.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"></noscript>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<script>
+  if(localStorage.getItem('clinic_session_v1') !== 'true'){
+    window.location.replace('login.html');
+  }
+</script>
+
+<header class="top-nav">
+  <div class="container nav-container">
+    <div class="logo-wrap">
+      <div class="logo-avatar">ВШ</div>
+      <div class="logo-text">
+        <span class="role">Кабинет главного врача</span>
+        <span class="name">Шумиловская В.С.</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="back-link">← <span>На сайт</span></a>
+      <button class="icon-btn" title="Уведомления" onclick="showToast('У вас есть новые заявки')">
+        🔔<span class="dot"></span>
+      </button>
+      <button class="icon-btn" title="Обновить" onclick="reloadAll();showToast('Данные обновлены')">🔄</button>
+      <button class="logout-btn" onclick="logout()">Выйти</button>
+    </div>
+  </div>
+</header>
+
+<div class="container layout">
+
+  <aside class="sidebar fade-up">
+    <div class="side-title">Управление</div>
+    <a class="side-link active" data-view="dashboard">📊 Обзор</a>
+    <a class="side-link" data-view="requests">📋 Заявления <span class="count" id="sideReqCount">0</span></a>
+    <a class="side-link" data-view="patients">👥 База пациентов <span class="count" id="sidePatCount">0</span></a>
+    <a class="side-link" data-view="schedule">📅 Расписание</a>
+    <div class="side-divider"></div>
+    <div class="side-title">Быстрые действия</div>
+    <a class="side-link side-link-book" onclick="openNewAppointmentModal()">📅 Записать пациента</a>
+    <a class="side-link" onclick="openPatientModal()">➕ Новый пациент</a>
+    <a class="side-link" onclick="reloadAll();showToast('Данные загружены')">🔄 Обновить</a>
+    <a class="side-link" onclick="exportPatientsCsv()">📤 Экспорт пациентов</a>
+    <a class="side-link" onclick="clearAllRequests()">🗑 Очистить заявки</a>
+  </aside>
+
+  <main class="content">
+
+    <div class="view active" id="view-dashboard">
+      <div class="page-head fade-up">
+        <div>
+          <div class="greeting">Добрый день, Вероника Сергеевна</div>
+          <h1>Панель управления</h1>
+          <p class="sub">Обзор заявок, пациентов и расписания</p>
+        </div>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="exportPatientsCsv()">📤 Экспорт</button>
+          <button class="btn btn-primary btn-sm" onclick="openNewAppointmentModal()">📅 Записать пациента</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi fade-up" data-delay="1"><div class="kpi-top"><div class="kpi-icon" style="background:var(--info-soft);color:#3F6E92;">📋</div><span class="trend up">● live</span></div><div class="kpi-num" id="kpiNew">0</div><div class="kpi-label">Новых заявок</div></div>
+        <div class="kpi fade-up" data-delay="2"><div class="kpi-top"><div class="kpi-icon" style="background:var(--success-soft);color:#3E7A5B;">✓</div><span class="trend up">● ok</span></div><div class="kpi-num" id="kpiConfirmed">0</div><div class="kpi-label">Подтверждено</div></div>
+        <div class="kpi fade-up" data-delay="3"><div class="kpi-top"><div class="kpi-icon" style="background:rgba(232,197,192,0.4);color:var(--rose-deep);">👥</div><span class="trend up">● all</span></div><div class="kpi-num" id="kpiPatients">0</div><div class="kpi-label">Пациентов в базе</div></div>
+        <div class="kpi fade-up" data-delay="4"><div class="kpi-top"><div class="kpi-icon" style="background:var(--warning-soft);color:#8A6A2E;">⏳</div><span class="trend down">● wait</span></div><div class="kpi-num" id="kpiPending">0</div><div class="kpi-label">Ожидают</div></div>
+      </div>
+
+      <section class="card panel fade-up">
+        <div class="panel-head">
+          <div class="ph-left"><h2>Последние заявки</h2><span class="ph-sub">Недавние обращения</span></div>
+          <button class="btn btn-ghost btn-sm" onclick="switchView('requests')">Все заявки →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Пациент</th><th>Услуга</th><th>Дата</th><th>Статус</th></tr></thead>
+            <tbody id="dashRequestsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="dashEmpty" style="display:none;">📥<p>Заявок пока нет</p></div>
+      </section>
+
+      <section class="card panel fade-up">
+        <div class="panel-head">
+          <div class="ph-left"><h2>Активные пациенты</h2><span class="ph-sub">С наибольшим числом визитов</span></div>
+          <button class="btn btn-ghost btn-sm" onclick="switchView('patients')">👥 База пациентов</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Пациент</th><th>Телефон</th><th>Визитов</th><th>Последний приём</th></tr></thead>
+            <tbody id="dashPatientsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="dashPatientsEmpty" style="display:none;">➕<p>База пациентов пуста</p></div>
+      </section>
+    </div>
+
+    <div class="view" id="view-requests">
+      <div class="page-head fade-up">
+        <div>
+          <div class="greeting">Заявки с сайта</div>
+          <h1>Заявления на приём</h1>
+          <p class="sub">Данные синхронизируются с публичным сайтом</p>
+        </div>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="reloadAll();showToast('Список обновлён')">🔄 Обновить</button>
+          <button class="btn btn-primary btn-sm" onclick="openNewAppointmentModal()">➕ Новая запись</button>
+        </div>
+      </div>
+
+      <section class="card panel fade-up">
+        <div class="tabs" id="filterTabs">
+          <button class="tab active" data-filter="all">Все <span class="tab-count" id="cntAll">0</span></button>
+          <button class="tab" data-filter="new">Новые <span class="tab-count" id="cntNew">0</span></button>
+          <button class="tab" data-filter="confirmed">Подтверждённые <span class="tab-count" id="cntConfirmed">0</span></button>
+          <button class="tab" data-filter="pending">Ожидают <span class="tab-count" id="cntPending">0</span></button>
+          <button class="tab" data-filter="cancelled">Отменённые <span class="tab-count" id="cntCancelled">0</span></button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Пациент</th><th>Тип приёма</th><th>Желаемая дата</th><th>Статус</th><th style="text-align:right;">Действия</th></tr></thead>
+            <tbody id="requestsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyRequests" style="display:none;">📥<p>Нет заявок с выбранным статусом</p></div>
+      </section>
+    </div>
+
+    <div class="view" id="view-patients">
+      <div class="page-head fade-up">
+        <div>
+          <div class="greeting">Дерматология и косметология</div>
+          <h1>База пациентов</h1>
+          <p class="sub">Полная информация о пациентах клиники</p>
+        </div>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="exportPatientsCsv()">📤 Экспорт CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openPatientModal()">➕ Добавить пациента</button>
+        </div>
+      </div>
+
+      <div class="patient-stats fade-up">
+        <div class="patient-stat"><div class="ps-num" id="psTotal">0</div><div class="ps-label">Всего пациентов</div></div>
+        <div class="patient-stat"><div class="ps-num" id="psActive">0</div><div class="ps-label">Активных</div></div>
+        <div class="patient-stat"><div class="ps-num" id="psNew">0</div><div class="ps-label">Новых за месяц</div></div>
+        <div class="patient-stat"><div class="ps-num" id="psVisits">0</div><div class="ps-label">Всего визитов</div></div>
+      </div>
+
+      <section class="card panel fade-up">
+        <div class="panel-head">
+          <div class="ph-left"><h2>Список пациентов</h2><span class="ph-sub" id="patientsCount">0 записей</span></div>
+        </div>
+
+        <div class="search-bar">
+          🔍<input type="text" id="patientSearch" placeholder="Поиск по имени, телефону или email...">
+        </div>
+
+        <div class="tabs" id="patientTabs">
+          <button class="tab active" data-pfilter="all">Все <span class="tab-count" id="pcntAll">0</span></button>
+          <button class="tab" data-pfilter="active">Активные <span class="tab-count" id="pcntActive">0</span></button>
+          <button class="tab" data-pfilter="archived">Архив <span class="tab-count" id="pcntArchived">0</span></button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Пациент</th><th>Контакты</th><th>Кожа / Диагноз</th><th>Дата рождения</th>
+                <th>Визитов</th><th>Последний</th><th>Статус</th><th style="text-align:right;">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="patientsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyPatients" style="display:none;">➕<p>Нет пациентов. Добавьте первого!</p></div>
+      </section>
+    </div>
+
+    <div class="view" id="view-schedule">
+      <div class="page-head fade-up">
+        <div>
+          <div class="greeting">Планирование</div>
+          <h1>Расписание на неделю</h1>
+          <p class="sub">Клик на свободный слот — записать пациента</p>
+        </div>
+      </div>
+      <section class="card panel fade-up">
+        <div class="schedule-grid" id="scheduleGrid"></div>
+      </section>
+    </div>
+
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head" id="modalHead">
+      <div><h3 id="modalTitle">Заголовок</h3><span class="ph-sub" id="modalSubtitle"></span></div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ <span id="toastText">Готово</span></div>
+
+<script src="js/admin.js" defer></script>
+</body>
+</html>
